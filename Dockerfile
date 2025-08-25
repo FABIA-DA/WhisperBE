@@ -1,23 +1,24 @@
-﻿FROM python:3.12
+﻿FROM mambaorg/micromamba@sha256:5e3b9c781f71c5d715a18216cdc9ce778bc974f478c6757a6e853a11d05fad12
 
-# Set working directory
 WORKDIR /app
 
-# Install system dependencies for audio processing
-RUN apt-get update && apt-get install -y \
-    ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
+# Copy envornment file
+COPY environment.yml .
 
-# Copy requirements file
-COPY requirements.txt .
+USER root
+# Create Conda environment with only conda packages
+RUN micromamba env create --copy -p /env --file environment.yml && \
+    micromamba clean --all --yes
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+USER $MAMBA_USER
 
-# Copy application code
-COPY . .
+# Make the dependencies accessible
+ENV PATH=/env/bin:$PATH
+ARG MAMBA_DOCKERFILE_ACTIVATE=1
 
-# Expose the port FastAPI runs on
+# Copy the rest of the app
+COPY --chmod=777 . .
+
 EXPOSE 8000
 
 # Command to run the application
