@@ -1,4 +1,5 @@
 ﻿FROM mambaorg/micromamba:git-c0f93d2
+
 WORKDIR /app
 
 COPY --chown=$MAMBA_USER:$MAMBA_USER environment.yml /tmp/env.yaml
